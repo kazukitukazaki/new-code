@@ -98,4 +98,3 @@ end
 predictedPVGen=Result_pv(:,1);
 % predictedPVGen=Result_pv(:,2);
 end
-

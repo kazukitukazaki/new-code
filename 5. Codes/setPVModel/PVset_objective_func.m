@@ -19,5 +19,4 @@ function [out] = PVset_objective_func(in)
         total_pred_load = sum(coef.*g_y_predict,2);   % predicted load for each time step
         out(i) = sum(abs(total_pred_load -  g_y_true)); % total of prediction error for one particle
     end
-
 end

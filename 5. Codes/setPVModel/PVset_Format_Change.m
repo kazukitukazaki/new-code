@@ -6,6 +6,7 @@
 % year,month,day -> 2 colunm    predictor(7~12 colunm at data)-> 3~8 
 % generation(13 colunm)- >9~104 sequence
 function y = PVset_Format_Change(input_data)
+    start_Format_Change = tic;
     new_format_PastData = input_data;
     % check again the size of new_version_PastData because of copy
     [m_new_format_PastData, ~] = size(new_format_PastData);
@@ -48,5 +49,6 @@ function y = PVset_Format_Change(input_data)
             end
         end
     end
+    end_Format_Change = toc(start_Format_Change)
     y=old_format_PastData;
  

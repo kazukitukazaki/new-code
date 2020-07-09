@@ -4,7 +4,7 @@
 %-----------------------------------------------------------
 
 function coeff = PVset_pso_main(y_predict, y_true)
-
+    start_pso_main = tic;
     % Declare the global variables
     PVset_global_var_declare;
 
@@ -39,6 +39,7 @@ function coeff = PVset_pso_main(y_predict, y_true)
         PVset_run_pso;
         coeff(hour).data = pso_out(1:end-1);
     end
+    end_pso_main = toc(start_pso_main)
 end
 
 

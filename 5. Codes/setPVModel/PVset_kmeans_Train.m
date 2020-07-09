@@ -1,5 +1,5 @@
 function PVset_kmeans_Train(LongTermpastData, path)
-f = waitbar(0,'PVset_kmeans_Train Start','Name','PVset_kmeans_Train');
+start_kmeans_Train = tic;
 % PV prediction: Model development algorithm made by Seung Hyeon  
 % 2019/06/25 Updated by gyeong gak (kakkyoung2@gmail.com)
 % The code has been modified to match the PV forecast
@@ -16,8 +16,6 @@ sig_value = std(Past_Load_dataData(:,7:12));
 dataTrainStandardized = (Past_Load_dataData(:,7:12) - mean_value) ./ sig_value;
 dataTrainStandardized = horzcat(Past_Load_dataData(:,1:6),dataTrainStandardized,Past_Load_dataData(:,13)); 
 %% Correlation coefficient
-waitbar(.16,f,'Correlation coefficient');
-
 predata=dataTrainStandardized;
 predata( ~any(predata(:,13),2), : ) = []; 
 R=corrcoef(predata(:,1:13));
@@ -33,8 +31,6 @@ for i=1:size(R,1)
     end
 end
 %% Kmeans clustering for forecast sunlight data
-waitbar(.32,f,'Kmeans clustering for forecast sunlight data');
-
 past_feature_sunlight = horzcat(dataTrainStandardized(:,[3 5]), dataTrainStandardized(:,predictor_sun)); % combine 1~5 columns & 9,10 columns
 past_load_sunlight = dataTrainStandardized(:,12);
 % Set K for sunlight. 20 is experimentally chosen by gyeong gak. 
@@ -43,8 +39,6 @@ k_sunlight = 30;
 [idx_sunlight,c_sunlight] = kmeans(past_load_sunlight,k_sunlight); % Set index ans class value using k-means
 nb_sunlight = fitcnb(past_feature_sunlight, idx_sunlight,'Distribution','kernel'); % Bayesian Classification 
 %% If there is no 1 day past data, Make clone data
-waitbar(.4,f,'If there is no 1 day past data, Make clone data');
-
 if m_new_format_PastData < 96
     dataTrainStandardized(1:96,[1,3,4]) = dataTrainStandardized(1,[1,3,4]); % building ID
     dataTrainStandardized(1:96,5) = transpose([0 0 0 1 1 1 1 2 2 2 2 3 3 3 3 4 4 4 4 5 5 5 5 6 6 6 6 7 7 7 7 8 8 8 8 9 9 9 9 10 10 10 10 ...
@@ -60,12 +54,11 @@ end
 %  6:Cloud, 7:Rain 8:SolarIrradiance,  9~104:Generation
 Patterned_PastData = PVset_Format_Change(dataTrainStandardized);
 %% Train model
-waitbar(.55,f,'Train model');
-
 Feature =horzcat(2,predictor_ger-4);
 [days, ~] = size(Patterned_PastData);
+eva_k_pv = evalclusters(Patterned_PastData(:,9:104),'kmeans','Gap','Klist',[1:5],'ReferenceDistribution','uniform','SearchMethod','firstMaxSE');
+k_pv = eva_k_pv.OptimalK;
 if days <= 30
-    k_pv = 2;
     [idx_PastData,c_PastData_pv] = kmeans(Patterned_PastData(:,9:104),k_pv); % Set index ans class value using k-means
     train_feature = Patterned_PastData(:,Feature);                       % feature
     train_label = idx_PastData(:,1);                                     % class index
@@ -82,7 +75,7 @@ else
         raw_70_PastData = raw_100_PastData(1:m_raw_70_PastData,:);
         raw_30_PastData = raw_100_PastData(m_raw_70_PastData+1:end,:);
             %% validation for selecting otimal k
-        eva = evalclusters(raw_70_PastData(:,9:104),'kmeans','Gap','Klist',[5:30],'ReferenceDistribution','uniform','SearchMethod','firstMaxSE');
+        eva = evalclusters(raw_70_PastData(:,9:104),'kmeans','Gap','Klist',[5:15],'B',90,'ReferenceDistribution','uniform','SearchMethod','firstMaxSE');
         k=eva.OptimalK;
             %% k-means past train data
         [idx_PastData,c_PastData] = kmeans(raw_70_PastData(:,9:104),k);
@@ -113,8 +106,6 @@ else
     end
 end
 %% Save .mat file
-waitbar(.90,f,'Save .mat file');
-
 clearvars input;
 building_num = num2str(LongTermpastData(2,1));
 save_name = '\PV_Model_';
@@ -126,7 +117,5 @@ else
     save(save_name,'nb_pv_loop','c_PastData_pv_loop','idx_PastData_loop','Feature','nb_sunlight',...
         'c_sunlight','idx_sunlight','sig_value','mean_value','predictor_sun');
 end
-waitbar(1,f,'finish');
-close(f)
+end_kmeans_Train = toc(start_kmeans_Train)
 end
-

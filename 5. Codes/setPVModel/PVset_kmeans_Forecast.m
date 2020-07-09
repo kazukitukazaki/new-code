@@ -1,4 +1,5 @@
 function predictedPVGen = PVset_kmeans_Forecast(ForecastData, shortTermPastData, path)
+start_kmeans_Forecast = tic;
 % PV prediction: Forecast algorithm made by Seung Hyeon  
 % 2019/06/25 Updated by gyeong gak (kakkyoung2@gmail.com)
 % The code has been modified to match the PV forecast
@@ -9,13 +10,11 @@ building_num = num2str(ForecastData(2,1));
 load_name = '\PV_Model_';
 load_name = strcat(path,load_name,building_num,'.mat');
 load(load_name,'-mat');
-
 %% Standardization
 % The k-means clusters data using Euclidean distance. so We have to equalize the distance between the data.
 % Data such as time, irradiation, etc. have high variance. so i standardize
 dataForecastStandardized = (ForecastData(:,7:11) - mean_value(1:5)) ./ sig_value(1:5);
 dataForecastStandardized = horzcat(ForecastData(:,1:6),dataForecastStandardized);
-
 %% Forecast solarlrradiance
 % There is no solar irradiance data so i predict solar data using k-means
 % Feature values: 1.Year 2.Month 3.Day 4.Temperature 5.Cloud
@@ -25,7 +24,6 @@ predict_label_nb_sunlight = nb_sunlight.predict(predictorArray);     % Find sola
 result_nb_sunlight = c_sunlight(predict_label_nb_sunlight,:);        % Find solar irradiance using solar's idex
 dataForecastStandardized = horzcat(dataForecastStandardized,result_nb_sunlight); % Make a new forecast data
 ForecastData(:,12)=sig_value(6).*result_nb_sunlight + mean_value(6);       % Return standardized data back to real value.
-
 %% Patterning ForecastData
 % In PV forecast, it is much better to use patterned data
 % Count day number -> (0~23: 1 day), (8~7: 2 days)
@@ -51,7 +49,6 @@ for i = 1:m_ForecastData
         k=i;
     end
 end
-
 %% Use k-means, bayesian for predict
 [Forecastday, ~] = size(patterned_Forecastdata);
 Result_idx = zeros(Forecastday,1);
@@ -69,7 +66,6 @@ end
 % Average the results and derive the final result
 Result_cluster_mean = Result_cluster{1}+Result_cluster{2}+Result_cluster{3};
 Result_cluster_final = Result_cluster_mean/3;
-
 %% Make a prediction result
 % Returns to the original data format.
 % Generation: 8~103 colume -> 1~96 row
@@ -86,21 +82,6 @@ for i = 1:m_ForecastData
         j = j + 1;
     end
 end
-y_pv = new_version_ResultingData(1:m_ForecastData,13);
-% Return standardized data back to real value.
-Result_pv(:,1) =y_pv;
-if exist('shortTermPastData','var')
-    y_err_rate = PVset_error_correction_kmeans(shortTermPastData,path);
+predictedPVGen = new_version_ResultingData(1:m_ForecastData,13);
+end_kmeans_Forecast = toc(start_kmeans_Forecast)
 end
-Result_pv(:,2)=Result_pv(:,1)./(1-y_err_rate');
-for i=1:size(Result_pv,1)
-    for j=1:size(Result_pv,2)
-        if Result_pv(i,j)<0.01
-            Result_pv(i,j)=0;
-        end
-    end
-end
-predictedPVGen=Result_pv(:,1);
-% predictedPVGen=Result_pv(:,2);
-end
-

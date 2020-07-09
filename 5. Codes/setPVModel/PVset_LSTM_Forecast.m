@@ -1,4 +1,5 @@
-function result1 = PVset_LSTM_Forecast(input,shorttermdata,path)
+function result = PVset_LSTM_Forecast(input,shorttermdata,path)
+start_LSTM_Forecast = tic;
 % PV prediction: LSTM Model Forecast algorithm
 % 2019/10/15 Updated gyeong gak (kakkyoung2@gmail.com)
 %% load .mat file
@@ -37,4 +38,5 @@ for i=1:size(result_LSTM,1)
         result_LSTM(i)=0;
     end
 end
-[result1,result2]= PVset_error_correction_sun(input,result_LSTM,shorttermdata,path); % result 2 is for ANN
+result = result_LSTM;
+end_LSTM_Forecast = toc(start_LSTM_Forecast)

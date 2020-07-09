@@ -5,7 +5,7 @@
 % ----------------------------------------------------------------------------
 function flag = PVset_setPVModel(LongTermPastData)
     f = waitbar(0,'PVset_setPVModel Start','Name','PVset_setPVMode');
-    tic;    
+    start_all = tic;    
     %% Get file path
     path = fileparts(LongTermPastData);
     %% parameters
@@ -24,14 +24,14 @@ function flag = PVset_setPVModel(LongTermPastData)
     train_data = longPast(1:end-n_valid_data, :); 
     valid_predictors = longPast(end-n_valid_data+1:end, 1:end-1);
     %% Train each model using past load data
-    waitbar(.1,f,'Training ANN');
+    waitbar(.1,f,'Training kmeans');
+    PVset_kmeans_Train(longPast, path);
+    
+    waitbar(.25,f,'Training ANN');
     PVset_ANN_Train(longPast, path);
     
-    waitbar(.25,f,'Training LSTM');    
+    waitbar(.4,f,'Training LSTM');    
     PVset_LSTM_train(longPast, path);
-
-    waitbar(.4,f,'Training kmeans');
-    PVset_kmeans_Train(longPast, path);
     %% Validate the performance of each model
     waitbar(.55,f,'Forecasting');
     g=waitbar(0,'PVset Forecasting(forLoop)','Name','PVset Forecasting(forLoop)');
@@ -66,7 +66,7 @@ function flag = PVset_setPVModel(LongTermPastData)
         y_ValidEstComb(1+(day-1)*96:day*96, 1) = y_est(:, day);
     end
     % error from validation data[%] error[%], hours, Quaters    
-    err = [y_ValidEstComb - valid_data(:, end) valid_predictors(:,5) valid_predictors(:,6)];  %5:Ω√∞£,6:ƒı≈Õ   
+    err = [y_ValidEstComb - valid_data(:, end) valid_predictors(:,5) valid_predictors(:,6)];  
     % Initialize the structure for error distribution
     % structure of err_distribution.data is as below:
     % row=25hours(0~24 in "LongTermPastData"), columns=4quarters.
@@ -99,7 +99,7 @@ function flag = PVset_setPVModel(LongTermPastData)
         save(matname, varX(i).value);
     end        
     flag = 1;    % Return 1 when the operation properly works
-    toc;
     waitbar(1,f,'finish');
     close(f)
+    end_all = toc(start_all)
 end

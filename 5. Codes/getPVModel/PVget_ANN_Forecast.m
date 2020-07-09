@@ -37,12 +37,9 @@ function target = PVget_ANN_Forecast(predictors,shortTermPastData,path)
         result_PV_ANN{i_loop} = result_PV_ANN_loop;
     end
     result_PV_ANN_premean = result_PV_ANN{1}+result_PV_ANN{2}+result_PV_ANN{3};
-    result_PV_ANN_mean = max(result_PV_ANN_premean/3,0);
-    %% Error correction
-    predictors(:,5)=predictors(:,5)-predictors(:,6)*0.25;
-    [result1,result2] = PVget_error_correction_sun(predictors,result_PV_ANN_mean,shortTermPastData,path);
+    result_PV_ANN_mean = max(result_PV_ANN_premean/3,0);   
     %% ResultingData File
     ResultingData_ANN(:,1:12) = predictors(:,1:12);
-    ResultingData_ANN(:,13) = result1;
+    ResultingData_ANN(:,13) = result_PV_ANN_mean;
     target = ResultingData_ANN(1:time_steps,13);
 end

@@ -1,4 +1,5 @@
 function PVset_LSTM_train(input,path)
+start_LSTM_train = tic;
 % PV prediction: LSTM Model Forecast algorithm
 % 2019/10/15 Updated gyeong gak (kakkyoung2@gmail.com)
 %% LOAD DATA
@@ -6,7 +7,7 @@ traindays=7;
 %% devide data (train,vaild)
 predata = input(end-96*traindays+1:end,:);
 meandata = mean(predata);
-sigdata = std(predata); %sig= 표준편차
+sigdata = std(predata); 
 if sigdata(11)==0 % in case of rain, its valus is usually 0. so it make NAN value
     sigdata(11)=1;
 end
@@ -26,7 +27,6 @@ for i=1:size(R,1)
     end
 end
 %% train lstm (solar)
-
 predictorscol1=[5 predictor_sun];
 predictors1=dataTrainStandardized(:,predictorscol1);
 targetdata1=dataTrainStandardized(:,12);
@@ -62,9 +62,6 @@ XTrain2=transpose(predictors2);
 YTrain2= transpose(targetdata2);
 %lstm
 numFeatures = size(predictorscol2,2);
-numResponses = 1;
-numHiddenUnits1 = 100;
-numHiddenUnits2 = 50;
 layers = [ ...
     sequenceInputLayer(numFeatures)
     lstmLayer(numHiddenUnits1)
@@ -89,6 +86,6 @@ pv_net = trainNetwork(XTrain2,YTrain2,layers,options);
     save_name = strcat(path,save_name,building_num,'.mat');
     clearvars path;
     save(save_name);
-
+    end_LSTM_train = toc(start_LSTM_train)
 end
 

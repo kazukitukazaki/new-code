@@ -92,7 +92,6 @@
 % 2/18/06
 
 function [OUT,varargout]=PVset_pso_Trelea_vectorized(functname,D,varargin)
-
 rand('state',sum(100*clock));
 if nargin < 2
    error('Not enough arguments.');
@@ -620,5 +619,4 @@ end  % end epoch loop
  OUT=[gbest';gbestval];
  varargout{1}=[1:te];
  varargout{2}=[tr(find(~isnan(tr)))];
- 
  return
