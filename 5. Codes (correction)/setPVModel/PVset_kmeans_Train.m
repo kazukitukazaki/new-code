@@ -56,7 +56,7 @@ Patterned_PastData = PVset_Format_Change(dataTrainStandardized);
 %% Train model
 Feature =horzcat(2,predictor_ger-4);
 [days, ~] = size(Patterned_PastData);
-eva_k_pv = evalclusters(Patterned_PastData(:,9:104),'kmeans','Gap','Klist',[1:5],'ReferenceDistribution','uniform','SearchMethod','firstMaxSE');
+eva_k_pv = evalclusters(Patterned_PastData(:,9:104),'kmeans','Gap','Klist',[7:12],'ReferenceDistribution','uniform','SearchMethod','firstMaxSE');
 k_pv = eva_k_pv.OptimalK;
 if days <= 30
     [idx_PastData,c_PastData_pv] = kmeans(Patterned_PastData(:,9:104),k_pv); % Set index ans class value using k-means
