@@ -227,7 +227,7 @@ function flag = PVget_getPVModel(ShortTermPastData, forecastData, resultdata)
       %% Get Deterministic prediction result                 
       % four method
             [~,numCols]=size(coeff(1,:));
-            for predict_time=11:18
+            for predict_time=10:17
                 for hour = 1:24
                     if hour==predict_time                       
                             for i = 1:numCols+1 
@@ -310,14 +310,14 @@ function flag = PVget_getPVModel(ShortTermPastData, forecastData, resultdata)
                 PVget_graph_desc(xtime, yDetermPred4, observed, boundaries_4, graphname_Combined_4, ci_percentage,max_xtime); % Combined 
 
         % predict time 
-                L_Predict_time=num2str(predict_time-1.5);
-                U_Predict_time=num2str(predict_time-1);
-                Xtime=(predict_time-2.5:0.5:predict_time)';
+                L_Predict_time=num2str(predict_time-0.5);
+                U_Predict_time=num2str(predict_time);
+                Xtime=(predict_time-1.5:0.5:predict_time+1)';
                 max_xtime=predict_time;
                 graphname_predict_time_3=strcat('Combined the results of the three predictions ',Number,'(predict time',L_Predict_time,'~',U_Predict_time,' ) ');
                 graphname_predict_time_4=strcat('Combined the results of the four predictions ',Number,'(predict time',L_Predict_time,'~',U_Predict_time,' ) ');
-                PVget_graph_desc(Xtime, yDetermPred3((predict_time-2)*2+1:(predict_time+1)*2,1), observed((predict_time-2)*2+1:(predict_time+1)*2,1), boundaries_3((predict_time-2)*2+1:(predict_time+1)*2,:), graphname_predict_time_3, ci_percentage,max_xtime); % Combined 
-                PVget_graph_desc(Xtime, yDetermPred4((predict_time-2)*2+1:(predict_time+1)*2,1), observed((predict_time-2)*2+1:(predict_time+1)*2,1), boundaries_4((predict_time-2)*2+1:(predict_time+1)*2,:), graphname_predict_time_4, ci_percentage,max_xtime); % Combined
+                PVget_graph_desc(Xtime, yDetermPred3((predict_time-1)*2+1-2:predict_time*2+2,1), observed((predict_time-1)*2+1-2:predict_time*2+2,1), boundaries_3((predict_time-1)*2+1-2:predict_time*2+2,:), graphname_predict_time_3, ci_percentage,max_xtime); % Combined 
+                PVget_graph_desc(Xtime, yDetermPred4((predict_time-1)*2+1-2:predict_time*2+2,1), observed((predict_time-1)*2+1-2:predict_time*2+2,1), boundaries_4((predict_time-1)*2+1-2:predict_time*2+2,:), graphname_predict_time_4, ci_percentage,max_xtime); % Combined
     
          % Cover Rate of PI (four method)
                 count = 0;
@@ -330,18 +330,22 @@ function flag = PVget_getPVModel(ShortTermPastData, forecastData, resultdata)
 
         % Cover Rate of PI (predict time 3)
                 count = 0;
-                for i = 1:size(Xtime,1)
-                    if (L_boundary_3((predict_time-1)*2+i)<=observed(predict_time*2)) && (observed((predict_time-1)*2+i)<=U_boundary_3(predict_time*2))
-                        count = count+1;
+                for i = 1:size(yDetermPred4,1)
+                    if i==(predict_time-1)*2-1 || i==(predict_time-1)*2 || i==(predict_time-1)*2+1 || i==predict_time*2 || i==predict_time*2+1 || i==predict_time*2+2 
+                        if (L_boundary_3(i)<=observed(i)) && (observed(i)<=U_boundary_3(i))
+                            count = count+1;
+                        end
                     end
                 end
                 PICoverRate_3_predict_time = 100*count/size(Xtime,1); 
 
         % Cover Rate of PI (predict time 4)
                 count = 0;
-                for i = 1:size(Xtime,1)
-                    if (L_boundary_4((predict_time-1)*2+i)<=observed(predict_time*2)) && (observed((predict_time-1)*2+i)<=U_boundary_4(predict_time*2))
-                        count = count+1;
+                for i = 1:size(yDetermPred4,1)
+                    if i==(predict_time-1)*2-1 || i==(predict_time-1)*2 || i==(predict_time-1)*2+1 || i==predict_time*2 || i==predict_time*2+1 || i==predict_time*2+2 
+                        if (L_boundary_4(i)<=observed(i)) && (observed(i)<=U_boundary_4(i))
+                            count = count+1;
+                        end
                     end
                 end
                 PICoverRate_4_predict_time = 100*count/size(Xtime,1); 
@@ -391,8 +395,8 @@ function flag = PVget_getPVModel(ShortTermPastData, forecastData, resultdata)
                 disp(['MAPE of combined the results of the three predictions (predict time) ', num2str(MAPE(7)),'[%]','    RMSE of combine model the results of the three predictions (predict time) ', num2str(RMSE(7))])
                 disp(['MAPE of combined the results of the four predictions (predict time) ', num2str(MAPE(8)),'[%]','    RMSE of combine model the results of the four predictions (predict time)', num2str(RMSE(8))])
             
-                Data=horzcat(PV_ID,predict_time-1,PICoverRate_3,PICoverRate_4,PICoverRate_3_predict_time,PICoverRate_4_predict_time,RMSE(1),RMSE(6),RMSE(2),RMSE(3),RMSE(4),RMSE(5),RMSE(7),RMSE(8));
-                if predict_time==11
+                Data=horzcat(PV_ID,predict_time,PICoverRate_3,PICoverRate_4,PICoverRate_3_predict_time,PICoverRate_4_predict_time,RMSE(1),RMSE(6),RMSE(2),RMSE(3),RMSE(4),RMSE(5),RMSE(7),RMSE(8));
+                if predict_time==10
                     data=Data;
                 else
                     data=vertcat(data,Data);
